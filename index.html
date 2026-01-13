@@ -1,172 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Reset Password</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+  <meta charset="UTF-8" />
+  <title>Reset Password</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Supabase -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-    <!-- Lottie -->
-    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #000;
+      color: #fff;
+    }
 
-    <style>
-      * {
-        box-sizing: border-box;
-      }
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url("./fitness1.jpg") center / cover no-repeat;
+    }
 
-      body {
-        margin: 0;
-        height: 100vh;
-        background: #000;
-        color: #fff;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+    }
 
-      .container {
-        width: 100%;
-        max-width: 360px;
-        padding: 24px;
-        text-align: center;
-      }
+    .container {
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-      input {
-        width: 100%;
-        padding: 14px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.2);
-        background: rgba(255,255,255,0.1);
-        color: #fff;
-        font-size: 16px;
-        margin-bottom: 12px;
-      }
+    .card {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(20,20,20,0.65);
+      border-radius: 22px;
+      padding: 28px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
 
-      button {
-        width: 100%;
-        padding: 14px;
-        border-radius: 14px;
-        border: none;
-        background: #f4ff47;
-        color: #000;
-        font-weight: 700;
-        font-size: 16px;
-        cursor: pointer;
-      }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
 
-      button:disabled {
-        opacity: 0.6;
-      }
+    p {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
 
-      #success {
-        display: none;
-      }
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
 
-      #lottie {
-        width: 220px;
-        height: 220px;
-        margin: 0 auto 10px;
-      }
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 700;
+      font-size: 16px;
+      background: #f4ff47;
+      color: #000;
+      cursor: pointer;
+    }
 
-      p {
-        color: #ccc;
-        margin-bottom: 20px;
-      }
+    button:active {
+      opacity: 0.85;
+    }
+  </style>
+</head>
 
-      a {
-        display: inline-block;
-        margin-top: 14px;
-        text-decoration: none;
-        color: #000;
-        background: #f4ff47;
-        padding: 12px 18px;
-        border-radius: 12px;
-        font-weight: 700;
-      }
-    </style>
-  </head>
+<body>
+  <div class="bg"></div>
+  <div class="overlay"></div>
 
-  <body>
-    <div class="container">
+  <div class="container">
+    <div class="card">
+      <h1>Reset Password</h1>
+      <p>Enter your new password below.</p>
 
-      <!-- RESET FORM -->
-      <div id="form">
-        <h2>Reset Password</h2>
-        <p>Enter a new password below</p>
+      <input type="password" placeholder="New password" />
+      <input type="password" placeholder="Confirm password" />
 
-        <input id="password" type="password" placeholder="New Password" />
-        <input id="confirm" type="password" placeholder="Confirm Password" />
-
-        <button id="submit">Reset Password</button>
-      </div>
-
-      <!-- SUCCESS -->
-      <div id="success">
-        <div id="lottie"></div>
-        <h2>Password Updated</h2>
-        <p>Your password has been reset successfully.</p>
-        <a href="myapp://">Open App</a>
-      </div>
-
+      <button>Update Password</button>
     </div>
-
-    <script>
-      const supabase = supabaseJs.createClient(
-        "YOUR_SUPABASE_URL",
-        "YOUR_SUPABASE_ANON_KEY"
-      );
-
-      const params = new URLSearchParams(
-        window.location.hash.substring(1) || window.location.search.substring(1)
-      );
-
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-
-      if (!access_token || !refresh_token) {
-        alert("Invalid or expired reset link");
-      }
-
-      document.getElementById("submit").onclick = async () => {
-        const password = document.getElementById("password").value;
-        const confirm = document.getElementById("confirm").value;
-
-        if (!password || password.length < 6) {
-          alert("Password must be at least 6 characters");
-          return;
-        }
-
-        if (password !== confirm) {
-          alert("Passwords do not match");
-          return;
-        }
-
-        await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-
-        const { error } = await supabase.auth.updateUser({ password });
-
-        if (error) {
-          alert(error.message);
-          return;
-        }
-
-        document.getElementById("form").style.display = "none";
-        document.getElementById("success").style.display = "block";
-
-        lottie.loadAnimation({
-          container: document.getElementById("lottie"),
-          renderer: "svg",
-          loop: false,
-          autoplay: true,
-          path: "https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json"
-        });
-      };
-    </script>
-  </body>
+  </div>
+</body>
 </html>
