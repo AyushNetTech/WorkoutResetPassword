@@ -3,38 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <title>Reset Password</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <style>
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      height: 100vh;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: #000;
       color: #fff;
-    }
-
-    .bg {
-      position: fixed;
-      inset: 0;
-      background: url("./fitness1.jpg") center / cover no-repeat;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
+      background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url("./fitness1.jpg") center / cover no-repeat fixed;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .container {
-      position: relative;
-      height: 100%;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px 20px env(safe-area-inset-bottom);
     }
 
     .card {
@@ -44,35 +39,47 @@
       border-radius: 22px;
       padding: 28px;
       border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
     }
 
-    h1 {
-      font-size: 28px;
-      margin-bottom: 12px;
-    }
-
-    p {
-      color: #ccc;
-      margin-bottom: 20px;
-    }
+    h1 { font-size: 28px; margin-bottom: 12px; }
+    p { color: #ccc; margin-bottom: 20px; }
 
     .field {
       margin-bottom: 14px;
+      position: relative;
     }
 
     input {
       width: 100%;
-      padding: 14px;
+      padding: 14px 44px 14px 14px;
       border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.25);
       background: rgba(255,255,255,0.08);
       color: #fff;
       font-size: 16px;
+      scroll-margin-top: 140px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #f4ff47;
     }
 
     input.error {
       border-color: #ff4d4d;
       background: rgba(255,77,77,0.15);
+    }
+
+    .eye {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0.75;
+      user-select: none;
     }
 
     .error-text {
@@ -99,19 +106,49 @@
       cursor: not-allowed;
     }
 
-    .success {
-      color: #4effae;
+    /* ===== SUCCESS DIALOG ===== */
+    .dialog {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .dialog-card {
+      background: #111;
+      border-radius: 22px;
+      padding: 28px;
+      width: 90%;
+      max-width: 360px;
       text-align: center;
-      margin-top: 16px;
-      font-weight: 600;
+    }
+
+    .dialog h2 {
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+
+    .dialog p {
+      color: #bbb;
+      margin-bottom: 18px;
+    }
+
+    .open-app {
+      background: #f4ff47;
+      color: #000;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      display: block;
     }
   </style>
 </head>
 
 <body>
-  <div class="bg"></div>
-  <div class="overlay"></div>
-
   <div class="container">
     <div class="card">
       <h1>Reset Password</h1>
@@ -119,20 +156,41 @@
 
       <div class="field">
         <input id="password" type="password" placeholder="New password" />
+        <span class="eye" onclick="toggle('password', this)">👁️</span>
         <div id="passwordError" class="error-text"></div>
       </div>
 
       <div class="field">
         <input id="confirm" type="password" placeholder="Confirm password" />
+        <span class="eye" onclick="toggle('confirm', this)">👁️</span>
         <div id="confirmError" class="error-text"></div>
       </div>
 
       <button id="submit">Update Password</button>
-      <div id="success" class="success"></div>
+    </div>
+  </div>
+
+  <!-- SUCCESS DIALOG -->
+  <div class="dialog" id="dialog">
+    <div class="dialog-card">
+      <lottie-player
+        src="https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json"
+        background="transparent"
+        speed="1"
+        style="width: 180px; height: 180px; margin: auto;"
+        autoplay
+      ></lottie-player>
+
+      <h2>Password Updated</h2>
+      <p>Your password has been changed successfully.</p>
+
+      <a class="open-app" href="myapp://">Open App</a>
     </div>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
   <script>
     const { createClient } = supabase;
 
@@ -145,13 +203,26 @@
     const confirmInput = document.getElementById("confirm");
     const passwordError = document.getElementById("passwordError");
     const confirmError = document.getElementById("confirmError");
-    const successText = document.getElementById("success");
     const button = document.getElementById("submit");
+    const dialog = document.getElementById("dialog");
+
+    function toggle(id, el) {
+      const input = document.getElementById(id);
+      input.type = input.type === "password" ? "text" : "password";
+      el.textContent = input.type === "password" ? "👁️" : "🙈";
+    }
+
+    [passwordInput, confirmInput].forEach(input => {
+      input.addEventListener("focus", () => {
+        setTimeout(() => {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 300);
+      });
+    });
 
     function resetErrors() {
       passwordError.textContent = "";
       confirmError.textContent = "";
-      successText.textContent = "";
       passwordInput.classList.remove("error");
       confirmInput.classList.remove("error");
     }
@@ -162,27 +233,21 @@
       const password = passwordInput.value.trim();
       const confirm = confirmInput.value.trim();
 
-      let valid = true;
-
-      if (!password || password.length < 6) {
-        passwordError.textContent = "Password must be at least 6 characters";
+      if (password.length < 6) {
+        passwordError.textContent = "Minimum 6 characters required";
         passwordInput.classList.add("error");
-        valid = false;
+        return;
       }
 
       if (password !== confirm) {
         confirmError.textContent = "Passwords do not match";
         confirmInput.classList.add("error");
-        valid = false;
+        return;
       }
-
-      if (!valid) return;
 
       button.disabled = true;
 
-      const { error } = await supabaseClient.auth.updateUser({
-        password,
-      });
+      const { error } = await supabaseClient.auth.updateUser({ password });
 
       button.disabled = false;
 
@@ -190,9 +255,8 @@
         confirmError.textContent = error.message;
         confirmInput.classList.add("error");
       } else {
-        successText.textContent = "Password updated successfully. You can now log in.";
-        passwordInput.value = "";
-        confirmInput.value = "";
+        dialog.style.display = "flex";
+        setTimeout(() => window.location.href = "myapp://", 4000);
       }
     });
   </script>
