@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -27,7 +25,7 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0,0,0,0.55);
     }
 
     .container {
@@ -58,6 +56,10 @@
       margin-bottom: 20px;
     }
 
+    .field {
+      margin-bottom: 14px;
+    }
+
     input {
       width: 100%;
       padding: 14px;
@@ -66,7 +68,17 @@
       background: rgba(255,255,255,0.08);
       color: #fff;
       font-size: 16px;
-      margin-bottom: 20px;
+    }
+
+    input.error {
+      border-color: #ff4d4d;
+      background: rgba(255,77,77,0.15);
+    }
+
+    .error-text {
+      color: #ff4d4d;
+      font-size: 13px;
+      margin-top: 6px;
     }
 
     button {
@@ -79,10 +91,19 @@
       background: #f4ff47;
       color: #000;
       cursor: pointer;
+      margin-top: 10px;
     }
 
-    button:active {
-      opacity: 0.85;
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .success {
+      color: #4effae;
+      text-align: center;
+      margin-top: 16px;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -96,47 +117,84 @@
       <h1>Reset Password</h1>
       <p>Enter your new password below.</p>
 
-      <input type="password" placeholder="New password" />
-      <input type="password" placeholder="Confirm password" />
+      <div class="field">
+        <input id="password" type="password" placeholder="New password" />
+        <div id="passwordError" class="error-text"></div>
+      </div>
 
-      <button>Update Password</button>
-      <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-        <script>
-          const supabase = supabase.createClient(
-            "https://mftvgiceccapzcgheaom.supabase.co",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdHZnaWNlY2NhcHpjZ2hlYW9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MzAwNjEsImV4cCI6MjA3OTQwNjA2MX0.JYZX3i-lYcuCCyKSPlGbQFgAN2XG1AMntI3YNgfw780"
-          );
+      <div class="field">
+        <input id="confirm" type="password" placeholder="Confirm password" />
+        <div id="confirmError" class="error-text"></div>
+      </div>
 
-          const button = document.querySelector("button");
-          const inputs = document.querySelectorAll("input");
-
-          button.addEventListener("click", async () => {
-            const password = inputs[0].value;
-            const confirm = inputs[1].value;
-
-            if (!password || password.length < 6) {
-              alert("Password must be at least 6 characters");
-              return;
-            }
-
-            if (password !== confirm) {
-              alert("Passwords do not match");
-              return;
-            }
-
-            const { error } = await supabase.auth.updateUser({
-              password,
-            });
-
-            if (error) {
-              alert(error.message);
-            } else {
-              alert("Password updated successfully. You can now log in.");
-            }
-          });
-        </script>
-
+      <button id="submit">Update Password</button>
+      <div id="success" class="success"></div>
     </div>
   </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = supabase;
+
+    const supabaseClient = createClient(
+      "https://mftvgiceccapzcgheaom.supabase.co",
+      "YOUR_PUBLIC_ANON_KEY"
+    );
+
+    const passwordInput = document.getElementById("password");
+    const confirmInput = document.getElementById("confirm");
+    const passwordError = document.getElementById("passwordError");
+    const confirmError = document.getElementById("confirmError");
+    const successText = document.getElementById("success");
+    const button = document.getElementById("submit");
+
+    function resetErrors() {
+      passwordError.textContent = "";
+      confirmError.textContent = "";
+      successText.textContent = "";
+      passwordInput.classList.remove("error");
+      confirmInput.classList.remove("error");
+    }
+
+    button.addEventListener("click", async () => {
+      resetErrors();
+
+      const password = passwordInput.value.trim();
+      const confirm = confirmInput.value.trim();
+
+      let valid = true;
+
+      if (!password || password.length < 6) {
+        passwordError.textContent = "Password must be at least 6 characters";
+        passwordInput.classList.add("error");
+        valid = false;
+      }
+
+      if (password !== confirm) {
+        confirmError.textContent = "Passwords do not match";
+        confirmInput.classList.add("error");
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      button.disabled = true;
+
+      const { error } = await supabaseClient.auth.updateUser({
+        password,
+      });
+
+      button.disabled = false;
+
+      if (error) {
+        confirmError.textContent = error.message;
+        confirmInput.classList.add("error");
+      } else {
+        successText.textContent = "Password updated successfully. You can now log in.";
+        passwordInput.value = "";
+        confirmInput.value = "";
+      }
+    });
+  </script>
 </body>
 </html>
