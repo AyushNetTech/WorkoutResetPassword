@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Reset Password</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <!-- Lottie -->
+    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        background: #000;
+        color: #fff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 360px;
+        padding: 24px;
+        text-align: center;
+      }
+
+      input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        border-radius: 14px;
+        border: none;
+        background: #f4ff47;
+        color: #000;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+      }
+
+      #success {
+        display: none;
+      }
+
+      #lottie {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto 10px;
+      }
+
+      p {
+        color: #ccc;
+        margin-bottom: 20px;
+      }
+
+      a {
+        display: inline-block;
+        margin-top: 14px;
+        text-decoration: none;
+        color: #000;
+        background: #f4ff47;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <!-- RESET FORM -->
+      <div id="form">
+        <h2>Reset Password</h2>
+        <p>Enter a new password below</p>
+
+        <input id="password" type="password" placeholder="New Password" />
+        <input id="confirm" type="password" placeholder="Confirm Password" />
+
+        <button id="submit">Reset Password</button>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="success">
+        <div id="lottie"></div>
+        <h2>Password Updated</h2>
+        <p>Your password has been reset successfully.</p>
+        <a href="myapp://">Open App</a>
+      </div>
+
+    </div>
+
+    <script>
+      const supabase = supabaseJs.createClient(
+        "YOUR_SUPABASE_URL",
+        "YOUR_SUPABASE_ANON_KEY"
+      );
+
+      const params = new URLSearchParams(
+        window.location.hash.substring(1) || window.location.search.substring(1)
+      );
+
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      if (!access_token || !refresh_token) {
+        alert("Invalid or expired reset link");
+      }
+
+      document.getElementById("submit").onclick = async () => {
+        const password = document.getElementById("password").value;
+        const confirm = document.getElementById("confirm").value;
+
+        if (!password || password.length < 6) {
+          alert("Password must be at least 6 characters");
+          return;
+        }
+
+        if (password !== confirm) {
+          alert("Passwords do not match");
+          return;
+        }
+
+        await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        const { error } = await supabase.auth.updateUser({ password });
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        document.getElementById("form").style.display = "none";
+        document.getElementById("success").style.display = "block";
+
+        lottie.loadAnimation({
+          container: document.getElementById("lottie"),
+          renderer: "svg",
+          loop: false,
+          autoplay: true,
+          path: "https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json"
+        });
+      };
+    </script>
+  </body>
+</html>
