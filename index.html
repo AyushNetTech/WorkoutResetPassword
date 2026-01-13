@@ -145,6 +145,25 @@
       text-decoration: none;
       display: block;
     }
+    .dialog {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .dialog.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
   </style>
 </head>
 
@@ -174,12 +193,13 @@
   <div class="dialog" id="dialog">
     <div class="dialog-card">
       <lottie-player
+        id="successLottie"
         src="https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json"
         background="transparent"
         speed="1"
-        style="width: 180px; height: 180px; margin: auto;"
-        autoplay
+        style="width: 250px; height: 250px; margin: auto;"
       ></lottie-player>
+
 
       <h2>Password Updated</h2>
       <p>Your password has been changed successfully.</p>
@@ -205,6 +225,18 @@
     const confirmError = document.getElementById("confirmError");
     const button = document.getElementById("submit");
     const dialog = document.getElementById("dialog");
+    const lottie = document.getElementById("successLottie");
+
+    function showSuccessDialog() {
+    dialog.classList.add("show");
+
+    // 🧠 IMPORTANT: restart animation cleanly
+    setTimeout(() => {
+      lottie.stop();
+      lottie.load(lottie.src);
+      lottie.play();
+    }, 150);
+  }
 
     function toggle(id, el) {
       const input = document.getElementById(id);
@@ -255,8 +287,7 @@
         confirmError.textContent = error.message;
         confirmInput.classList.add("error");
       } else {
-        dialog.style.display = "flex";
-        // setTimeout(() => window.location.href = "myapp://", 4000);
+        showSuccessDialog();
       }
     });
   </script>
