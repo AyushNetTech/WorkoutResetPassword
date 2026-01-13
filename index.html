@@ -100,6 +100,42 @@
       <input type="password" placeholder="Confirm password" />
 
       <button>Update Password</button>
+      <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+        <script>
+          const supabase = supabase.createClient(
+            "https://mftvgiceccapzcgheaom.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mdHZnaWNlY2NhcHpjZ2hlYW9tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MzAwNjEsImV4cCI6MjA3OTQwNjA2MX0.JYZX3i-lYcuCCyKSPlGbQFgAN2XG1AMntI3YNgfw780"
+          );
+
+          const button = document.querySelector("button");
+          const inputs = document.querySelectorAll("input");
+
+          button.addEventListener("click", async () => {
+            const password = inputs[0].value;
+            const confirm = inputs[1].value;
+
+            if (!password || password.length < 6) {
+              alert("Password must be at least 6 characters");
+              return;
+            }
+
+            if (password !== confirm) {
+              alert("Passwords do not match");
+              return;
+            }
+
+            const { error } = await supabase.auth.updateUser({
+              password,
+            });
+
+            if (error) {
+              alert(error.message);
+            } else {
+              alert("Password updated successfully. You can now log in.");
+            }
+          });
+        </script>
+
     </div>
   </div>
 </body>
