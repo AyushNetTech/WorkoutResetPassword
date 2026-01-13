@@ -196,6 +196,8 @@
         id="successLottie"
         src="https://lottie.host/90307a83-e341-4fa4-a501-ad324e5d1fe2/iVftJlRGQJ.lottie"
         style="width: 250px; height: 250px; margin: auto;"
+        autoplay
+        loop
       >
       </dotlottie-wc>
 
@@ -226,14 +228,20 @@
     const lottie = document.getElementById("successLottie");
 
     function showSuccessDialog() {
-    dialog.classList.add("show");
+      dialog.classList.add("show");
 
-    // 🧠 IMPORTANT: restart animation cleanly
-    setTimeout(() => {
-      lottie.stop();
-      lottie.play();
-    }, 150);
-  }
+      // Ensure animation starts only after it's ready
+      if (lottie.isReady) {
+        lottie.stop();
+        lottie.play();
+      } else {
+        lottie.addEventListener("ready", () => {
+          lottie.stop();
+          lottie.play();
+        }, { once: true });
+      }
+    }
+
 
     function toggle(id, el) {
       const input = document.getElementById(id);
