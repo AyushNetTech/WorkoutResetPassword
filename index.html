@@ -192,14 +192,12 @@
   <!-- SUCCESS DIALOG -->
   <div class="dialog" id="dialog">
     <div class="dialog-card">
-      <lottie-player
+      <dotlottie-wc
         id="successLottie"
-        src="https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json"
-        background="transparent"
-        speed="1"
+        src="https://lottie.host/90307a83-e341-4fa4-a501-ad324e5d1fe2/iVftJlRGQJ.lottie"
         style="width: 250px; height: 250px; margin: auto;"
-      ></lottie-player>
-
+      >
+      </dotlottie-wc>
 
       <h2>Password Updated</h2>
       <p>Your password has been changed successfully.</p>
@@ -232,10 +230,9 @@
 
     // 🧠 IMPORTANT: restart animation cleanly
     setTimeout(() => {
-      lottie.stop();
-      lottie.load(lottie.src);
-      lottie.play();
-    }, 150);
+        lottie.stop?.();
+        lottie.play?.();
+      }, 150);
   }
 
     function toggle(id, el) {
@@ -292,4 +289,8 @@
     });
   </script>
 </body>
+  <script
+    type="module"
+    src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js">
+  </script>
 </html>
